@@ -16,3 +16,6 @@ Einfach `index.html` im Browser öffnen.
 - Score + Highscore (localStorage)
 - Kollisionserkennung
 - Geschwindigkeit steigt mit Punkten
+- Pause/Fortsetzen mit Leertaste
+- Touch-D-Pad für mobile Geräte
+- HUD mit Spielstatus (Start/Playing/Paused/Game Over)

@@ -2,6 +2,7 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const highscoreEl = document.getElementById('highscore');
+const stateEl = document.getElementById('state');
 const startBtn = document.getElementById('startBtn');
 
 const gridSize = 20;
@@ -14,10 +15,17 @@ let food;
 let score;
 let highscore = Number(localStorage.getItem('snake-highscore') || 0);
 let gameOver;
+let paused;
+let running;
 let speed;
 let loopId;
 
 highscoreEl.textContent = highscore;
+setState('Press Start');
+
+function setState(text) {
+  stateEl.textContent = text;
+}
 
 function reset() {
   snake = [{ x: 10, y: 10 }];
@@ -27,9 +35,25 @@ function reset() {
   score = 0;
   speed = 130;
   gameOver = false;
+  paused = false;
+  running = true;
   scoreEl.textContent = score;
   if (loopId) clearTimeout(loopId);
+  setState('Playing');
   tick();
+}
+
+function togglePause() {
+  if (!running || gameOver) return;
+  paused = !paused;
+  if (paused) {
+    clearTimeout(loopId);
+    setState('Paused');
+    render();
+  } else {
+    setState('Playing');
+    tick();
+  }
 }
 
 function spawnFood() {
@@ -44,7 +68,7 @@ function spawnFood() {
 }
 
 function tick() {
-  if (gameOver) return render();
+  if (gameOver || paused) return render();
 
   dir = nextDir;
   const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
@@ -55,6 +79,8 @@ function tick() {
     snake.some(seg => seg.x === head.x && seg.y === head.y)
   ) {
     gameOver = true;
+    running = false;
+    setState('Game Over');
     render();
     return;
   }
@@ -101,6 +127,7 @@ function render() {
     ctx.fillRect(seg.x * gridSize + 1, seg.y * gridSize + 1, gridSize - 2, gridSize - 2);
   });
 
+  // overlays
   if (gameOver) {
     ctx.fillStyle = 'rgba(0,0,0,0.45)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -109,21 +136,50 @@ function render() {
     ctx.textAlign = 'center';
     ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 8);
     ctx.font = '16px system-ui';
-    ctx.fillText('Drücke Start / Restart', canvas.width / 2, canvas.height / 2 + 24);
+    ctx.fillText('Press Start / Restart', canvas.width / 2, canvas.height / 2 + 24);
+  } else if (paused) {
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 28px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Paused', canvas.width / 2, canvas.height / 2 - 8);
+    ctx.font = '16px system-ui';
+    ctx.fillText('Space to resume', canvas.width / 2, canvas.height / 2 + 24);
   }
 }
 
 function setDirection(x, y) {
+  if (!dir) return;
   if (x === -dir.x && y === -dir.y) return;
   nextDir = { x, y };
 }
 
 window.addEventListener('keydown', (e) => {
+  if (e.key === ' ') {
+    e.preventDefault();
+    togglePause();
+    return;
+  }
+  if (!running || paused) return;
   const key = e.key.toLowerCase();
   if (key === 'arrowup' || key === 'w') setDirection(0, -1);
   if (key === 'arrowdown' || key === 's') setDirection(0, 1);
   if (key === 'arrowleft' || key === 'a') setDirection(-1, 0);
   if (key === 'arrowright' || key === 'd') setDirection(1, 0);
+});
+
+// Touch D-Pad
+document.querySelectorAll('.dpad-btn').forEach(btn => {
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    if (paused || !running) return;
+    const d = btn.dataset.dir;
+    if (d === 'up') setDirection(0, -1);
+    if (d === 'down') setDirection(0, 1);
+    if (d === 'left') setDirection(-1, 0);
+    if (d === 'right') setDirection(1, 0);
+  });
 });
 
 startBtn.addEventListener('click', reset);

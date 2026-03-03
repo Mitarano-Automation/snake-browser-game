@@ -2,23 +2,31 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Snake Browser Game</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app">
-    <h1>🐍 Snake</h1>
+    <h1>Snake</h1>
     <div class="hud">
       <span>Score: <strong id="score">0</strong></span>
-      <span>Highscore: <strong id="highscore">0</strong></span>
+      <span id="state">Press Start</span>
+      <span>Best: <strong id="highscore">0</strong></span>
     </div>
 
     <canvas id="game" width="400" height="400" aria-label="Snake Spielfeld"></canvas>
 
     <div class="controls">
       <button id="startBtn">Start / Restart</button>
-      <p>Steuerung: Pfeiltasten oder WASD</p>
+      <p>Arrow keys / WASD &middot; Space = Pause</p>
+    </div>
+
+    <div class="dpad" aria-label="Touch D-Pad">
+      <button class="dpad-btn up"  data-dir="up">&uarr;</button>
+      <button class="dpad-btn left" data-dir="left">&larr;</button>
+      <button class="dpad-btn right" data-dir="right">&rarr;</button>
+      <button class="dpad-btn down" data-dir="down">&darr;</button>
     </div>
   </main>
 
