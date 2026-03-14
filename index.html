@@ -18,6 +18,14 @@
     <canvas id="game" width="400" height="400" aria-label="Snake Spielfeld"></canvas>
 
     <div class="controls">
+      <div class="settings-row">
+        <label for="difficulty">Schwierigkeit</label>
+        <select id="difficulty" aria-label="Schwierigkeit auswählen">
+          <option value="easy">Leicht</option>
+          <option value="medium" selected>Mittel</option>
+          <option value="hard">Schwer</option>
+        </select>
+      </div>
       <button id="startBtn">Start / Restart</button>
       <p>Arrow keys / WASD &middot; Space = Pause</p>
     </div>

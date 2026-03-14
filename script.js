@@ -4,9 +4,15 @@ const scoreEl = document.getElementById('score');
 const highscoreEl = document.getElementById('highscore');
 const stateEl = document.getElementById('state');
 const startBtn = document.getElementById('startBtn');
+const difficultyEl = document.getElementById('difficulty');
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
+const difficultySettings = {
+  easy: { label: 'Leicht', startSpeed: 160, minSpeed: 95, speedStep: 2 },
+  medium: { label: 'Mittel', startSpeed: 130, minSpeed: 70, speedStep: 3 },
+  hard: { label: 'Schwer', startSpeed: 100, minSpeed: 55, speedStep: 4 },
+};
 
 let snake;
 let dir;
@@ -19,6 +25,7 @@ let paused;
 let running;
 let speed;
 let loopId;
+let difficulty = difficultyEl.value;
 
 highscoreEl.textContent = highscore;
 setState('Press Start');
@@ -28,18 +35,20 @@ function setState(text) {
 }
 
 function reset() {
+  const settings = difficultySettings[difficulty] || difficultySettings.medium;
+
   snake = [{ x: 10, y: 10 }];
   dir = { x: 1, y: 0 };
   nextDir = { x: 1, y: 0 };
   food = spawnFood();
   score = 0;
-  speed = 130;
+  speed = settings.startSpeed;
   gameOver = false;
   paused = false;
   running = true;
   scoreEl.textContent = score;
   if (loopId) clearTimeout(loopId);
-  setState('Playing');
+  setState(`Playing · ${settings.label}`);
   tick();
 }
 
@@ -88,8 +97,9 @@ function tick() {
   snake.unshift(head);
 
   if (head.x === food.x && head.y === food.y) {
+    const settings = difficultySettings[difficulty] || difficultySettings.medium;
     score += 10;
-    speed = Math.max(70, speed - 3);
+    speed = Math.max(settings.minSpeed, speed - settings.speedStep);
     scoreEl.textContent = score;
     if (score > highscore) {
       highscore = score;
@@ -188,6 +198,14 @@ document.querySelectorAll('.dpad-btn').forEach(btn => {
     e.preventDefault();
     applyDirectionFromButton(btn);
   });
+});
+
+difficultyEl.addEventListener('change', () => {
+  difficulty = difficultyEl.value;
+  if (!running || gameOver) {
+    const settings = difficultySettings[difficulty] || difficultySettings.medium;
+    setState(`Press Start · ${settings.label}`);
+  }
 });
 
 startBtn.addEventListener('click', reset);
