@@ -13,7 +13,7 @@ let dir;
 let nextDir;
 let food;
 let score;
-let highscore = Number(localStorage.getItem('snake-highscore') || 0);
+let highscore = 0;
 let gameOver;
 let paused;
 let running;
@@ -93,7 +93,6 @@ function tick() {
     scoreEl.textContent = score;
     if (score > highscore) {
       highscore = score;
-      localStorage.setItem('snake-highscore', highscore);
       highscoreEl.textContent = highscore;
     }
     food = spawnFood();
@@ -169,16 +168,25 @@ window.addEventListener('keydown', (e) => {
   if (key === 'arrowright' || key === 'd') setDirection(1, 0);
 });
 
-// Touch D-Pad
+function applyDirectionFromButton(btn) {
+  if (paused || !running) return;
+  const d = btn.dataset.dir;
+  if (d === 'up') setDirection(0, -1);
+  if (d === 'down') setDirection(0, 1);
+  if (d === 'left') setDirection(-1, 0);
+  if (d === 'right') setDirection(1, 0);
+}
+
+// Mobile / touch-friendly D-Pad
 document.querySelectorAll('.dpad-btn').forEach(btn => {
-  btn.addEventListener('touchstart', (e) => {
+  btn.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    if (paused || !running) return;
-    const d = btn.dataset.dir;
-    if (d === 'up') setDirection(0, -1);
-    if (d === 'down') setDirection(0, 1);
-    if (d === 'left') setDirection(-1, 0);
-    if (d === 'right') setDirection(1, 0);
+    applyDirectionFromButton(btn);
+  });
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    applyDirectionFromButton(btn);
   });
 });
 
